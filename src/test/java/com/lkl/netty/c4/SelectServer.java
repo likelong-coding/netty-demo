@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
 import static com.lkl.netty.utils.ByteBufferUtil.debugRead;
@@ -43,25 +46,39 @@ public class SelectServer {
 
                 // 4、处理事件，selectedKeys 内部包含了所有发生的事件
                 Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
-                while (iterator.hasNext()){
+                while (iterator.hasNext()) {
                     SelectionKey key = iterator.next();
                     log.debug("key: {}", key);
 
                     // 5、可能有不同事件类型，区分事件类型
-                    if (key.isAcceptable()){ // accept
+                    if (key.isAcceptable()) { // accept
                         ServerSocketChannel channel = (ServerSocketChannel) key.channel();
                         SocketChannel sc = channel.accept();
                         sc.configureBlocking(false);
                         SelectionKey scKey = sc.register(selector, 0, null);
                         scKey.interestOps(SelectionKey.OP_READ);
                         log.debug("{}", sc);
-                    }else if(key.isReadable()){
-                        SocketChannel channel = (SocketChannel) key.channel();
-                        ByteBuffer buffer = ByteBuffer.allocate(16);
-                        channel.read(buffer);
-                        buffer.flip();
-                        debugRead(buffer);
+                    } else if (key.isReadable()) {
+                        try {
+                            SocketChannel channel = (SocketChannel) key.channel();
+                            ByteBuffer buffer = ByteBuffer.allocate(16);
+                            int read = channel.read(buffer);// 强制关闭客户端，这里会报异常
+                            // 如果是正常断开，read值为-1
+                            if (read == -1) {
+                                key.cancel(); // 此时任然要取消 key
+                            } else {
+                                buffer.flip();
+                                debugRead(buffer);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            // 异常断开
+                            key.cancel(); // 因为客户端断开了，因此需要将 key 取消（从 Selector 的 keys 集合中真正删除 key）
+                        }
                     }
+
+                    // 事件处理完后，集合（selectedKeys）中的对应的key不会自动删除，需要我们手动删除，防止事件再次被处理从而引发错误
+                    iterator.remove();
 
                     // key.cancel();
                 }
