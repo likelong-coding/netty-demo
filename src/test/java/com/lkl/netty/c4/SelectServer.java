@@ -11,7 +11,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
-import static com.lkl.netty.utils.ByteBufferUtil.debugRead;
+import static com.lkl.netty.utils.ByteBufferUtil.debugAll;
 
 /**
  * @author likelong
@@ -19,6 +19,30 @@ import static com.lkl.netty.utils.ByteBufferUtil.debugRead;
  */
 @Slf4j
 public class SelectServer {
+
+    private static void split(ByteBuffer buffer) {
+        // 切换为读模式
+        buffer.flip();
+        for (int i = 0; i < buffer.limit(); i++) {
+            // 找到一条完整消息
+            if (buffer.get(i) == '\n') {
+                // 计算每一个消息长度
+                int length = i + 1 - buffer.position();
+                // 将完整的消息存入新的ByteBuffer
+                ByteBuffer target = ByteBuffer.allocate(length);
+
+                // 从 buffer 中读，向 target 中写
+                for (int j = 0; j < length; j++) {
+                    target.put(buffer.get());
+                }
+                debugAll(target);
+            }
+        }
+
+        // 切换为写模式，但是缓冲区可能未读完，这里需要使用compact
+        buffer.compact();
+        // compact() 查看源码是将position移到未读元素位置 当客户端发送的消息大于服务端缓冲区时，position == limit
+    }
 
     public static void main(String[] args) {
 
@@ -55,20 +79,31 @@ public class SelectServer {
                         ServerSocketChannel channel = (ServerSocketChannel) key.channel();
                         SocketChannel sc = channel.accept();
                         sc.configureBlocking(false);
-                        SelectionKey scKey = sc.register(selector, 0, null);
+                        ByteBuffer buffer = ByteBuffer.allocate(16); // attachment
+                        // 第三个参数 `附件` 将ByteBuffer作为附件 与 scKey 一一绑定，防止不同通道之间相互影响  附件提高作用域
+                        SelectionKey scKey = sc.register(selector, 0, buffer);
                         scKey.interestOps(SelectionKey.OP_READ);
                         log.debug("{}", sc);
                     } else if (key.isReadable()) {
                         try {
                             SocketChannel channel = (SocketChannel) key.channel();
-                            ByteBuffer buffer = ByteBuffer.allocate(16);
+                            // 取出key中附件 ByteBuffer
+                            ByteBuffer buffer = (ByteBuffer) key.attachment();
                             int read = channel.read(buffer);// 强制关闭客户端，这里会报异常
                             // 如果是正常断开，read值为-1
                             if (read == -1) {
                                 key.cancel(); // 此时任然要取消 key
                             } else {
-                                buffer.flip();
-                                debugRead(buffer);
+                                split(buffer);
+                                if(buffer.position() == buffer.limit()){
+                                    // 此时说明发送数据大于缓冲区，需要将缓冲区扩容 暂扩容为二倍
+                                    ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() * 2);
+                                    // 将旧的buffer中的内容放到新的buffer中
+                                    buffer.flip();
+                                    newBuffer.put(buffer);
+                                    // 替换原本附件
+                                    key.attach(newBuffer);
+                                }
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
