@@ -1,5 +1,6 @@
-package com.lkl.netty.c4;
+package com.lkl.nio.c4;
 
+import com.lkl.nio.utils.ByteBufferUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -10,8 +11,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-
-import static com.lkl.netty.utils.ByteBufferUtil.debugAll;
 
 /**
  * @author likelong
@@ -35,7 +34,7 @@ public class SelectServer {
                 for (int j = 0; j < length; j++) {
                     target.put(buffer.get());
                 }
-                debugAll(target);
+                ByteBufferUtil.debugAll(target);
             }
         }
 

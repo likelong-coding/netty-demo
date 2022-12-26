@@ -1,4 +1,4 @@
-package com.lkl.netty.c4;
+package com.lkl.nio.c4;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,7 +9,7 @@ import java.nio.channels.CompletionHandler;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import static com.lkl.netty.utils.ByteBufferUtil.debugAll;
+import static com.lkl.nio.utils.ByteBufferUtil.debugAll;
 
 /**
  * @author likelong

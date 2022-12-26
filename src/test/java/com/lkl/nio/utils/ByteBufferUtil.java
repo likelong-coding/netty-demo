@@ -1,4 +1,4 @@
-package com.lkl.netty.utils;
+package com.lkl.nio.utils;
 
 import io.netty.util.internal.MathUtil;
 import io.netty.util.internal.StringUtil;

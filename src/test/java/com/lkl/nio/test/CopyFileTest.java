@@ -1,4 +1,4 @@
-package com.lkl.netty.test;
+package com.lkl.nio.test;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;

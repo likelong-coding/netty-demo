@@ -1,8 +1,8 @@
-package com.lkl.netty.c2;
+package com.lkl.nio.c2;
+
+import com.lkl.nio.utils.ByteBufferUtil;
 
 import java.nio.ByteBuffer;
-
-import static com.lkl.netty.utils.ByteBufferUtil.debugAll;
 
 /**
  * @author likelong
@@ -33,6 +33,6 @@ public class TestByteBufferRead {
 
         // get(i) 读取指定位置数据，不会改变 position 位置
         System.out.println((char) buffer.get(3));
-        debugAll(buffer);
+        ByteBufferUtil.debugAll(buffer);
     }
 }

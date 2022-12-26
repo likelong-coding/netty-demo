@@ -1,9 +1,9 @@
-package com.lkl.netty.c2;
+package com.lkl.nio.c2;
+
+import com.lkl.nio.utils.ByteBufferUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
-import static com.lkl.netty.utils.ByteBufferUtil.debugAll;
 
 /**
  * ByteBuffer 与 字符串 相互转换
@@ -19,15 +19,15 @@ public class ByteBufferStringConvert {
         // 1、 ByteBuffer put方法
         ByteBuffer buffer1 = ByteBuffer.allocate(16);
         buffer1.put("hello".getBytes());
-        debugAll(buffer1);
+        ByteBufferUtil.debugAll(buffer1);
 
         // 2、CharSet 将字符串转成ByteBuffer，同时已经切换为读模式
         ByteBuffer buffer2 = StandardCharsets.UTF_8.encode("hello");
-        debugAll(buffer2);
+        ByteBufferUtil.debugAll(buffer2);
 
         // 3、ByteBuffer wrap方法 也是已切换到读模式
         ByteBuffer buffer3 = ByteBuffer.wrap("hello".getBytes());
-        debugAll(buffer3);
+        ByteBufferUtil.debugAll(buffer3);
 
         // ByteBuffer 转 字符串
         // 通过StandardCharsets解码，获得CharBuffer，再通过toString获得字符串

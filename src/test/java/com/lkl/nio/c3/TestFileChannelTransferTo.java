@@ -1,4 +1,4 @@
-package com.lkl.netty.c3;
+package com.lkl.nio.c3;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

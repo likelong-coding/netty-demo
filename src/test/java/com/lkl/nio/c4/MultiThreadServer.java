@@ -1,4 +1,4 @@
-package com.lkl.netty.c4;
+package com.lkl.nio.c4;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.lkl.netty.utils.ByteBufferUtil.debugAll;
+import static com.lkl.nio.utils.ByteBufferUtil.debugAll;
 
 /**
  * @author likelong

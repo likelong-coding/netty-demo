@@ -1,8 +1,8 @@
-package com.lkl.netty.c2;
+package com.lkl.nio.c2;
 
 import java.nio.ByteBuffer;
 
-import static com.lkl.netty.utils.ByteBufferUtil.debugAll;
+import static com.lkl.nio.utils.ByteBufferUtil.debugAll;
 
 /**
  *  参考博客 https://nyimac.gitee.io/2021/04/18/Netty%E5%AD%A6%E4%B9%A0%E4%B9%8BNIO%E5%9F%BA%E7%A1%80/#Netty%E5%AD%A6%E4%B9%A0%E4%B9%8BNIO%E5%9F%BA%E7%A1%80

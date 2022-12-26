@@ -1,4 +1,4 @@
-package com.lkl.netty.c2;
+package com.lkl.nio.c2;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

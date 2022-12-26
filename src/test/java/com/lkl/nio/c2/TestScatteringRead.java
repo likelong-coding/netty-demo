@@ -1,11 +1,11 @@
-package com.lkl.netty.c2;
+package com.lkl.nio.c2;
+
+import com.lkl.nio.utils.ByteBufferUtil;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-
-import static com.lkl.netty.utils.ByteBufferUtil.debugAll;
 
 /**
  * @author likelong
@@ -18,9 +18,9 @@ public class TestScatteringRead {
             ByteBuffer b2 = ByteBuffer.allocate(3);
             ByteBuffer b3 = ByteBuffer.allocate(5);
             channel.read(new ByteBuffer[]{b1, b2, b3});
-            debugAll(b1);
-            debugAll(b2);
-            debugAll(b3);
+            ByteBufferUtil.debugAll(b1);
+            ByteBufferUtil.debugAll(b2);
+            ByteBufferUtil.debugAll(b3);
         } catch (IOException e) {
         }
     }

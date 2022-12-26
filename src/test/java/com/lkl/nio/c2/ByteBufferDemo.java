@@ -1,8 +1,8 @@
-package com.lkl.netty.c2;
+package com.lkl.nio.c2;
 
 import java.nio.ByteBuffer;
 
-import static com.lkl.netty.utils.ByteBufferUtil.debugAll;
+import static com.lkl.nio.utils.ByteBufferUtil.debugAll;
 
 /**
  * @author likelong
