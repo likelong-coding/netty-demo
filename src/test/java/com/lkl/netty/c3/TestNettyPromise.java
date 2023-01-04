@@ -25,7 +25,7 @@ public class TestNettyPromise {
             // 3、任意一个线程执行计算，计算完毕 向 promise 填充结果
             log.debug("开始计算...");
             try {
-                int i = 1 / 0;
+//                int i = 1 / 0;
                 Thread.sleep(1000);
                 // 设置成功结果
                 promise.setSuccess(555);
@@ -37,8 +37,17 @@ public class TestNettyPromise {
         }).start();
 
         // 4、接收结果的线程
-        log.debug("等待结果...");
-        // get 阻塞同步
-        log.debug("结果是： {}", promise.get());
+//        log.debug("等待结果...");
+//        // get 阻塞同步
+//        log.debug("结果是： {}", promise.get());
+
+        // nio 线程 异步处理结果
+        promise.addListener(future -> {
+            log.debug("等待结果...");
+            log.debug("结果是： {}", promise.get());
+
+            // 优雅的关闭
+            eventLoop.shutdownGracefully();
+        });
     }
 }
