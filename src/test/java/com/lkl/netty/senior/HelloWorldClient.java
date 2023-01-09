@@ -29,7 +29,7 @@ public class HelloWorldClient {
                         @Override // 连接 channel 连接成功，会触发该事件
                         public void channelActive(ChannelHandlerContext ctx) throws Exception {
                             log.debug("sending...");
-                            // 每次发送16个字节的数据，共发送10次 服务端直接将10次发送的数据一次性接收了，发送粘包现象【我们本意是发十次一次发16字节】
+                            // 每次发送16个字节的数据，共发送10次 服务端直接将10次发送的数据一次性接收了，发送【粘包】现象（我们本意是发十次一次发16字节）
                             for (int i = 0; i < 10; i++) {
                                 ByteBuf buffer = ctx.alloc().buffer();
                                 buffer.writeBytes(new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15});

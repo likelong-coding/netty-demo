@@ -22,7 +22,7 @@ public class HelloWorldServer {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.channel(NioServerSocketChannel.class);
-            // 接收缓冲区调小一点，更好的出现半包现象
+            // 接收缓冲区调小一点，更好的出现【半包】现象
             serverBootstrap.option(ChannelOption.SO_RCVBUF, 10);
             serverBootstrap.group(boss, worker);
             serverBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
