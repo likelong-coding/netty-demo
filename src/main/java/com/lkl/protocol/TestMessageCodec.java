@@ -15,11 +15,12 @@ import io.netty.handler.logging.LoggingHandler;
 public class TestMessageCodec {
 
     public static void main(String[] args) throws Exception {
+
         EmbeddedChannel channel = new EmbeddedChannel(
-                // 添加帧解码器，避免粘包半包问题
+                new LoggingHandler(LogLevel.DEBUG),
+                // 添加帧解码器，避免粘包半包问题 粘包会把消息截断、半包会等收到完整消息 随即传给下一个handler处理
                 new LengthFieldBasedFrameDecoder(
                         1024, 12, 4, 0, 0),
-                new LoggingHandler(LogLevel.DEBUG),
                 new MessageCodec()
         );
 
@@ -31,7 +32,15 @@ public class TestMessageCodec {
         ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
         new MessageCodec().encode(null, message, buffer);
 
+        // 如果不加帧解码器，可能会出现粘包半包问题导致代码错误
+        // 切片模拟半包
+        ByteBuf buf1 = buffer.slice(0, 100);
+        buf1.retain(); // 引用计算 +1
+        ByteBuf buf2 = buffer.slice(100, buffer.readableBytes() - 100);
+
         // 入站
-        channel.writeInbound(buffer);
+        channel.writeInbound(buf1);
+        channel.writeInbound(buf2);
+
     }
 }
