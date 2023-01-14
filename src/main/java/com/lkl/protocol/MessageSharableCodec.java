@@ -2,8 +2,9 @@ package com.lkl.protocol;
 
 import com.lkl.message.Message;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageCodec;
+import io.netty.handler.codec.MessageToMessageCodec;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,31 +13,16 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 
 /**
- * 消息编解码器
- * https://nyimac.gitee.io/2021/04/25/Netty%E5%9F%BA%E7%A1%80/#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8D%8F%E8%AE%AE
- *
- * `@Sharable注解` 标识这个handler是否可以被共享，加了这个标识的handler说明可以被共享，线程安全【handler不会保存消息状态是无状态的】
- * https://nyimac.gitee.io/2021/04/25/Netty%E5%9F%BA%E7%A1%80/#Sharable%E6%B3%A8%E8%A7%A3
- *
- *
- * 我们的MessageCodec本身接收的是LengthFieldBasedFrameDecoder处理之后的数据，那么数据肯定是完整的，按分析来说是可以添加@Sharable注解的，
- * 但是由于其该父类 `ByteToMessageCodec`的限制不能添加@Sharable注解注解
- * 该父类设计初衷是这样的：
- * 将ByteBuf转化为Message，意味着传进该handler的数据还未被处理过。所以传过来的ByteBuf可能并不是完整的数据，如果共享则会出现问题
- * 如果想要我们的解析类所共享，继承MessageToMessageDecoder即可。
- * 该类的目标是：将已经被处理的完整数据再次被处理。传过来的Message如果是被处理过的完整数据，
- * 那么被共享也就不会出现问题了，也就可以使用@Sharable注解了。实现方式与ByteToMessageCodec类似
- *
+ * 该解析类要配合 LengthFieldBasedFrameDecoder 一起使用，
+ * 保证传递到该handler的消息是完整的【即在LengthFieldBasedFrameDecoder之后初始化】
  * @author likelong
- * @date 2023/1/12
+ * @date 2023/1/14
  */
-public class MessageCodec extends ByteToMessageCodec<Message> {
-
-    /**
-     * 编码，出站前，将 自定义Message 编码成 ByteBuf
-     */
+@ChannelHandler.Sharable // 标识该handler可以被共享是线程安全的
+public class MessageSharableCodec extends MessageToMessageCodec<ByteBuf, Message> {
     @Override
-    protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, Message msg, List<Object> outList) throws Exception {
+        ByteBuf out = ctx.alloc().buffer();
         // 设置魔数 4个字节
         out.writeBytes(new byte[]{'N', 'Y', 'I', 'M'});
         // 设置版本 1个字节
@@ -58,14 +44,12 @@ public class MessageCodec extends ByteToMessageCodec<Message> {
         out.writeInt(bytes.length);
         // 写入内容
         out.writeBytes(bytes);
+        outList.add(out);
     }
 
-    /**
-     * 解码，入站时，将 ByteBuf 解码成 Message消息
-     */
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        // 怎么编码的就怎么解码
+// 怎么编码的就怎么解码
         // 获取魔数
         int magicNum = in.readInt();
         // 获取版本号
