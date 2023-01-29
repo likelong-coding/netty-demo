@@ -73,22 +73,5 @@ public class MessageSharableCodec extends MessageToMessageCodec<ByteBuf, Message
         Message message = (Message) ois.readObject();
         // 将信息放入List中，传递给下一个handler
         out.add(message);
-
-        // 打印获得的信息正文
-        System.out.println("===========魔数===========");
-        // 魔数 为4字节整数可能比较大
-        System.out.println(magicNum);
-        System.out.println("===========版本号===========");
-        System.out.println(version);
-        System.out.println("===========序列化方法===========");
-        System.out.println(serializerType);
-        System.out.println("===========指令类型===========");
-        System.out.println(messageType);
-        System.out.println("===========请求序号===========");
-        System.out.println(sequenceId);
-        System.out.println("===========正文长度===========");
-        System.out.println(length);
-        System.out.println("===========正文===========");
-        System.out.println(message);
     }
 }

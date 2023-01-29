@@ -11,15 +11,13 @@ import lombok.ToString;
 public class LoginRequestMessage extends Message {
     private String username;
     private String password;
-    private String nickName;
 
     public LoginRequestMessage() {
     }
 
-    public LoginRequestMessage(String username, String password, String nickName) {
+    public LoginRequestMessage(String username, String password) {
         this.username = username;
         this.password = password;
-        this.nickName = nickName;
     }
 
     @Override

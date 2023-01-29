@@ -54,4 +54,18 @@ public class GroupSessionMemoryImpl implements GroupSession {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<Channel> getExpectMembersChannel(String groupName, String username) {
+        return getMembers(groupName).stream()
+                .filter(member -> !member.equals(username))
+                .map(member -> SessionFactory.getSession().getChannel(member))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isCreated(String groupName) {
+        return groupMap.containsKey(groupName);
+    }
 }

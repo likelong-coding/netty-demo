@@ -55,4 +55,19 @@ public interface GroupSession {
      * @return 成员 channel 集合
      */
     List<Channel> getMembersChannel(String name);
+
+    /**
+     * 除了当前用户名的所有 channel 集合
+     * @param groupName 组名
+     * @param username 用户名
+     * @return 成员 channel 集合
+     */
+    List<Channel> getExpectMembersChannel(String groupName, String username);
+
+    /**
+     * 判断群是否存在
+     * @param groupName 群名
+     * @return true / false
+     */
+    boolean isCreated(String groupName);
 }

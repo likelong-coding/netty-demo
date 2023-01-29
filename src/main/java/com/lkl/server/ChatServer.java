@@ -2,6 +2,10 @@ package com.lkl.server;
 
 import com.lkl.protocol.MessageSharableCodec;
 import com.lkl.protocol.ProtocolFrameDecoder;
+import com.lkl.server.handler.ChatRequestMessageHandler;
+import com.lkl.server.handler.GroupChatMessageHandler;
+import com.lkl.server.handler.GroupCreateMessageHandler;
+import com.lkl.server.handler.LoginRequestMessageHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -23,6 +27,10 @@ public class ChatServer {
         // 这两个handler 不记录消息状态，可以被共享 是线程安全的
         LoggingHandler loggingHandler = new LoggingHandler(LogLevel.DEBUG);
         MessageSharableCodec messageSharableCodec = new MessageSharableCodec();
+        LoginRequestMessageHandler loginRequestMessageHandler = new LoginRequestMessageHandler();
+        ChatRequestMessageHandler chatRequestMessageHandler = new ChatRequestMessageHandler();
+        GroupCreateMessageHandler groupCreateMessageHandler = new GroupCreateMessageHandler();
+        GroupChatMessageHandler groupChatMessageHandler = new GroupChatMessageHandler();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(boss, worker);
@@ -33,6 +41,11 @@ public class ChatServer {
                     ch.pipeline().addLast(new ProtocolFrameDecoder());
                     ch.pipeline().addLast(loggingHandler);
                     ch.pipeline().addLast(messageSharableCodec);
+                    // 只针对 LoginRequestMessage 消息进行处理
+                    ch.pipeline().addLast(loginRequestMessageHandler);
+                    ch.pipeline().addLast(chatRequestMessageHandler);
+                    ch.pipeline().addLast(groupCreateMessageHandler);
+                    ch.pipeline().addLast(groupChatMessageHandler);
                 }
             });
             Channel channel = bootstrap.bind(8080).sync().channel();
@@ -44,4 +57,5 @@ public class ChatServer {
             worker.shutdownGracefully();
         }
     }
+
 }

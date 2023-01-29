@@ -25,13 +25,12 @@ public class TestMessageCodec {
 
         EmbeddedChannel channel = new EmbeddedChannel(
                 FRAME_DECODER,
-                LOGGER_DECODER
-                ,
+                LOGGER_DECODER,
                 new MessageCodec()
         );
 
         // 先测试一下出站请求 encode
-        LoginRequestMessage message = new LoginRequestMessage("root", "247907lkl", "likelong");
+        LoginRequestMessage message = new LoginRequestMessage("root", "247907lkl");
         channel.writeOutbound(message);
 
         // decode
