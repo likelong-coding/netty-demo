@@ -4,15 +4,15 @@ import com.lkl.message.*;
 import com.lkl.protocol.MessageSharableCodec;
 import com.lkl.protocol.ProtocolFrameDecoder;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -46,6 +46,27 @@ public class ChatClient {
                     ch.pipeline().addLast(new ProtocolFrameDecoder());
 //                    ch.pipeline().addLast(loggingHandler);
                     ch.pipeline().addLast(messageSharableCodec);
+
+                    /*
+                    为避免因非网络等原因引发的READ_IDLE事件，比如网络情况良好，只是用户本身没有输入数据，这时发生READ_IDLE事件，直接让服务器断开连接是不可取的
+                     */
+                    // 用于空闲连接的检测，3s内未向服务器写数据，会触发WRITE_IDLE事件
+                    ch.pipeline().addLast(new IdleStateHandler(0, 3, 0));
+                    // 添加双向处理器ChannelDuplexHandler，负责处理WRITE_IDLE事件
+                    ch.pipeline().addLast(new ChannelDuplexHandler() {
+
+                        // 触发特定事件 会执行该方法
+                        @Override
+                        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+                            // 获得事件
+                            IdleStateEvent event = (IdleStateEvent) evt;
+                            if (event.state() == IdleState.WRITER_IDLE) {
+                                log.info("3s内，未向服务器写数据，发送心跳数据包，维持连接");
+                                ctx.writeAndFlush(new PingMessage());
+
+                            }
+                        }
+                    });
                     ch.pipeline().addLast("client_handler", new ChannelInboundHandlerAdapter() {
                         // 在连接建立后触发 active 事件
                         @Override
@@ -87,12 +108,12 @@ public class ChatClient {
 
                                         // 获得指令及其参数，并发送对应类型消息
                                         String[] commands = command.split(" ");
-                                        switch (commands[0]){
+                                        switch (commands[0]) {
                                             case "send":
                                                 ctx.writeAndFlush(new ChatRequestMessage(username, commands[1], commands[2]));
                                                 break;
                                             case "gsend":
-                                                ctx.writeAndFlush(new GroupChatRequestMessage(username,commands[1], commands[2]));
+                                                ctx.writeAndFlush(new GroupChatRequestMessage(username, commands[1], commands[2]));
                                                 break;
                                             case "gcreate":
                                                 // 分割，获得群员名
@@ -100,7 +121,7 @@ public class ChatClient {
                                                 Set<String> set = new HashSet<>(Arrays.asList(members));
                                                 // 把自己加入到群聊中
                                                 set.add(username);
-                                                ctx.writeAndFlush(new GroupCreateRequestMessage(commands[1],set));
+                                                ctx.writeAndFlush(new GroupCreateRequestMessage(commands[1], set));
                                                 break;
                                             case "gmembers":
                                                 ctx.writeAndFlush(new GroupMembersRequestMessage(commands[1]));

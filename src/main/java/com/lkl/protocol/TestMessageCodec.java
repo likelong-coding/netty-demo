@@ -1,8 +1,6 @@
 package com.lkl.protocol;
 
 import com.lkl.message.LoginRequestMessage;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.logging.LogLevel;
@@ -26,7 +24,7 @@ public class TestMessageCodec {
         EmbeddedChannel channel = new EmbeddedChannel(
                 FRAME_DECODER,
                 LOGGER_DECODER,
-                new MessageCodec()
+                new MessageSharableCodec()
         );
 
         // 先测试一下出站请求 encode
@@ -34,18 +32,18 @@ public class TestMessageCodec {
         channel.writeOutbound(message);
 
         // decode
-        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
-        new MessageCodec().encode(null, message, buffer);
-
-        // 如果不加帧解码器，可能会出现粘包半包问题导致代码错误
-        // 切片模拟半包
-        ByteBuf buf1 = buffer.slice(0, 100);
-        buf1.retain(); // 引用计数 +1
-        ByteBuf buf2 = buffer.slice(100, buffer.readableBytes() - 100);
-
-        // 入站 引用计数会 -1
-        channel.writeInbound(buf1);
-        channel.writeInbound(buf2);
+//        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
+//        new MessageCodec().encode(null, message, buffer);
+//
+//        // 如果不加帧解码器，可能会出现粘包半包问题导致代码错误
+//        // 切片模拟半包
+//        ByteBuf buf1 = buffer.slice(0, 100);
+//        buf1.retain(); // 引用计数 +1
+//        ByteBuf buf2 = buffer.slice(100, buffer.readableBytes() - 100);
+//
+//        // 入站 引用计数会 -1
+//        channel.writeInbound(buf1);
+//        channel.writeInbound(buf2);
 
     }
 }

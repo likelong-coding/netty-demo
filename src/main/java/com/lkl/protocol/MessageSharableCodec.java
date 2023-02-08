@@ -1,15 +1,12 @@
 package com.lkl.protocol;
 
+import com.lkl.config.Config;
 import com.lkl.message.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.List;
 
 /**
@@ -27,19 +24,21 @@ public class MessageSharableCodec extends MessageToMessageCodec<ByteBuf, Message
         out.writeBytes(new byte[]{'N', 'Y', 'I', 'M'});
         // 设置版本 1个字节
         out.writeByte(1);
-        // 设置序列化方式 0 jdk, 1 json... 1个字节
-        out.writeByte(0);
+        // 设置序列化方式 0 jdk, 1 json... 1个字节 ordinal() 序号，0：Java 1：Json
+        // 读取配置文件
+        out.writeByte(Config.getSerializerAlgorithm().ordinal());
         // 设置指令类型 1字节
         out.writeByte(msg.getMessageType());
         // 设置请求序号 4字节
         out.writeInt(msg.getSequenceId());
         // 无意义，为了补齐为16个字节，填充1个字节的数据
         out.writeByte(0xff);
-        // 获取内容字节数组
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(msg);
-        byte[] bytes = bos.toByteArray();
+        // 获取内容字节数组 序列化与反序列化 jdk自带的（效率不高）
+//        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//        ObjectOutputStream oos = new ObjectOutputStream(bos);
+//        oos.writeObject(msg);
+//        byte[] bytes = bos.toByteArray();
+        byte[] bytes = Config.getSerializerAlgorithm().serialize(msg);
         // 设置正文长度 4字节
         out.writeInt(bytes.length);
         // 写入内容
@@ -49,13 +48,13 @@ public class MessageSharableCodec extends MessageToMessageCodec<ByteBuf, Message
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-// 怎么编码的就怎么解码
+        // 怎么编码的就怎么解码
         // 获取魔数
         int magicNum = in.readInt();
         // 获取版本号
         byte version = in.readByte();
         // 获得序列化方式
-        byte serializerType = in.readByte();
+        byte serializerAlgorithm = in.readByte(); // 0 或 1
         // 获得指令类型
         byte messageType = in.readByte();
         // 获得请求序号
@@ -69,8 +68,12 @@ public class MessageSharableCodec extends MessageToMessageCodec<ByteBuf, Message
         in.readBytes(bytes, 0, length);
 
         // 字节数组转成对象
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
-        Message message = (Message) ois.readObject();
+//        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+//        Message message = (Message) ois.readObject();
+
+        // 实际实现类
+        Class<? extends Message> messageClass = Message.getMessageClass(messageType);
+        Message message = Serializer.Algorithm.values()[serializerAlgorithm].deserialize(messageClass, bytes);
         // 将信息放入List中，传递给下一个handler
         out.add(message);
     }
