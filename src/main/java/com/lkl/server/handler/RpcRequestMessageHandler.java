@@ -16,7 +16,7 @@ public class RpcRequestMessageHandler extends SimpleChannelInboundHandler<RpcReq
     protected void channelRead0(ChannelHandlerContext ctx, RpcRequestMessage rpcMessage) {
         RpcResponseMessage rpcResponseMessage = new RpcResponseMessage();
         try {
-            // 设置返回值的属性 【反射】
+            // 设置返回值的属性
             rpcResponseMessage.setSequenceId(rpcMessage.getSequenceId());
             // 返回一个实例
             HelloService service = (HelloService) ServicesFactory.getService(Class.forName(rpcMessage.getInterfaceName()));
