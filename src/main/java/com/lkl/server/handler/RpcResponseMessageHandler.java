@@ -19,6 +19,8 @@ public class RpcResponseMessageHandler extends SimpleChannelInboundHandler<RpcRe
      * 调用多次方法需要多个Promise
      * 需要一个集合管理这些Promise
      * Map key：value：Promise
+     *
+     * 泛型如果用了 '?' 的话，只能取不能放，但是可以放null
      */
     public static final Map<Integer, Promise<Object>> PROMISES = new ConcurrentHashMap<>();
 
@@ -26,7 +28,7 @@ public class RpcResponseMessageHandler extends SimpleChannelInboundHandler<RpcRe
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponseMessage msg) throws Exception {
         log.debug("{}", msg);
 
-        // 获取并移除Map中的Promise
+        // 获取并移除Map中的Promise对象
         Promise<Object> promise = PROMISES.remove(msg.getSequenceId());
 
         if (promise != null) {

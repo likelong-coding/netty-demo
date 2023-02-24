@@ -80,7 +80,7 @@ public class RPCClientManager {
         HelloService service = getProxyService(HelloService.class);
 
         System.out.println(service.sayHello("likelong"));
-        System.out.println(service.sayHello("xinpeng"));
+//        System.out.println(service.sayHello("xinpeng"));
     }
 
     // 创建代理类
@@ -101,7 +101,7 @@ public class RPCClientManager {
             // 2、将消息发送出去
             getChannel().writeAndFlush(message);
 
-            // 3、等待填充结果 用于获取NIO线程中的返回结果，获取的过程是异步的
+            // 3、等待填充结果 用于获取NIO线程中的返回结果，【获取的过程是异步的】
             DefaultPromise<Object> promise = new DefaultPromise<>(getChannel().eventLoop());
             // 将promise对象放入Map中
             RpcResponseMessageHandler.PROMISES.put(sequenceId, promise);
