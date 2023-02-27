@@ -9,6 +9,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.string.StringDecoder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,7 +34,7 @@ public class HelloServer {
                     @Override
                     protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
                         // 6、添加具体handler
-                        // nioSocketChannel.pipeline().addLast(new StringDecoder()); // 将 ByteBuf 转换为字符串
+                        nioSocketChannel.pipeline().addLast(new StringDecoder()); // 将 ByteBuf 转换为字符串
                         nioSocketChannel.pipeline().addLast(new ChannelInboundHandlerAdapter() { // 自定义handler
                             @Override // 读事件
                             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
