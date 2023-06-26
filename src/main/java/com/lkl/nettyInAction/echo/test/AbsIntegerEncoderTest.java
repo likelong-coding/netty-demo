@@ -1,6 +1,6 @@
 package com.lkl.nettyInAction.echo.test;
 
-import com.lkl.nettyInAction.echo.decoder.AbsIntegerEncoder;
+import com.lkl.nettyInAction.echo.codec.AbsIntegerEncoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;

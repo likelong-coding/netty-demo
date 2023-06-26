@@ -1,6 +1,6 @@
 package com.lkl.nettyInAction.echo.test;
 
-import com.lkl.nettyInAction.echo.decoder.FixedLengthFrameDecoder;
+import com.lkl.nettyInAction.echo.codec.FixedLengthFrameDecoder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;

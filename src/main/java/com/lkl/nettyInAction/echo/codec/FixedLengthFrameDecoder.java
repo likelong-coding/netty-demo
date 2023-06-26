@@ -1,4 +1,4 @@
-package com.lkl.nettyInAction.echo.decoder;
+package com.lkl.nettyInAction.echo.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
